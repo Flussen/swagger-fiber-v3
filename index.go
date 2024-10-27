@@ -1,5 +1,7 @@
 package swagger
 
+// indexTmpl is the HTML template for the Swagger UI index page.
+// using a CDN to load the CSS and JS files. (cloudflare)
 const indexTmpl string = `
 <!DOCTYPE html>
 <html lang="en">
