@@ -23,7 +23,7 @@ swag init
 ```
 4. Download [swagger](https://github.com/Flussen/swagger-fiber-v3) by using:
 ```sh
-go get -u github.com/Flussen/swagger/fiber/v3
+go get -u github.com/Flussen/swagger-fiber-v3
 ```
 And import following in your code:
 
