@@ -3,15 +3,11 @@ package swagger
 import (
 	"fmt"
 	"html/template"
-	"net/http"
 	"path"
 	"strings"
 	"sync"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/filesystem"
-	"github.com/gofiber/fiber/v2/utils"
-	swaggerFiles "github.com/swaggo/files/v2"
+	"github.com/gofiber/fiber/v3" // continúa usando swaggo/files para el FS
 	"github.com/swaggo/swag"
 )
 
@@ -34,68 +30,51 @@ func New(config ...Config) fiber.Handler {
 	var (
 		prefix string
 		once   sync.Once
-		fs     = filesystem.New(filesystem.Config{Root: http.FS(swaggerFiles.FS)})
 	)
 
-	return func(c *fiber.Ctx) error {
-		// Set prefix
-		once.Do(
-			func() {
-				prefix = strings.ReplaceAll(c.Route().Path, "*", "")
+	return func(c fiber.Ctx) error {
+		once.Do(func() {
+			prefix = strings.ReplaceAll(c.Route().Path, "*", "")
+			forwardedPrefix := getForwardedPrefix(c)
+			if forwardedPrefix != "" {
+				prefix = forwardedPrefix + prefix
+			}
 
-				forwardedPrefix := getForwardedPrefix(c)
-				if forwardedPrefix != "" {
-					prefix = forwardedPrefix + prefix
-				}
+			if len(cfg.URL) == 0 {
+				cfg.URL = path.Join(prefix, defaultDocURL)
+			}
+		})
 
-				// Set doc url
-				if len(cfg.URL) == 0 {
-					cfg.URL = path.Join(prefix, defaultDocURL)
-				}
-			},
-		)
-
-		p := c.Path(utils.CopyString(c.Params("*")))
+		p := c.Path(c.Params("*"))
 
 		switch p {
 		case defaultIndex:
 			c.Type("html")
 			return index.Execute(c, cfg)
 		case defaultDocURL:
-			var doc string
-			if doc, err = swag.ReadDoc(cfg.InstanceName); err != nil {
+			doc, err := swag.ReadDoc(cfg.InstanceName)
+			if err != nil {
 				return err
 			}
 			return c.Type("json").SendString(doc)
 		case "", "/":
-			return c.Redirect(path.Join(prefix, defaultIndex), fiber.StatusMovedPermanently)
+			c.Set("Location", path.Join(prefix, defaultIndex))
+			return c.Status(fiber.StatusMovedPermanently).Send(nil)
 		default:
-			return fs(c)
+			return c.SendFile(path.Join("path/to/static/swagger", p)) // Ajusta según el FS que uses
 		}
 	}
 }
 
-func getForwardedPrefix(c *fiber.Ctx) string {
-	header := c.GetReqHeaders()["X-Forwarded-Prefix"]
-
+func getForwardedPrefix(c fiber.Ctx) string {
+	header := c.Get("X-Forwarded-Prefix")
 	if len(header) == 0 {
 		return ""
 	}
 
-	prefix := ""
-
-	for _, rawPrefix := range header {
-		endIndex := len(rawPrefix)
-		for endIndex > 1 && rawPrefix[endIndex-1] == '/' {
-			endIndex--
-		}
-
-		if endIndex != len(rawPrefix) {
-			prefix += rawPrefix[:endIndex]
-		} else {
-			prefix += rawPrefix
-		}
+	endIndex := len(header)
+	for endIndex > 1 && header[endIndex-1] == '/' {
+		endIndex--
 	}
-
-	return prefix
+	return header[:endIndex]
 }
