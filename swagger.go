@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gofiber/fiber/v3" // continúa usando swaggo/files para el FS
+	"github.com/gofiber/fiber/v3"
 	"github.com/swaggo/swag"
 )
 
@@ -61,7 +61,7 @@ func New(config ...Config) fiber.Handler {
 			c.Set("Location", path.Join(prefix, defaultIndex))
 			return c.Status(fiber.StatusMovedPermanently).Send(nil)
 		default:
-			return c.SendFile(path.Join("path/to/static/swagger", p)) // Ajusta según el FS que uses
+			return c.SendStatus(fiber.StatusNotFound)
 		}
 	}
 }
