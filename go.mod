@@ -1,4 +1,4 @@
-module github.com/Flussen/swagger/fiber/v3
+module github.com/Flussen/swagger-fiber-v3
 
 go 1.23
 

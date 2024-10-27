@@ -1,12 +1,12 @@
-# Swagger
+# Swagger v2 for Fiber v3 Fork
 
-![Release](https://img.shields.io/github/release/gofiber/swagger.svg)
+<!-- ![Release](https://img.shields.io/github/release/gofiber/swagger.svg) -->
 [![Discord](https://img.shields.io/badge/discord-join%20channel-7289DA)](https://gofiber.io/discord)
 ![Tests](https://github.com/gofiber/swagger/actions/workflows/test.yml/badge.svg)
 ![Security](https://github.com/gofiber/swagger/workflows/Security/badge.svg)
 ![Linter](https://github.com/gofiber/swagger/workflows/Linter/badge.svg)
 
-fiber middleware to automatically generate RESTful API documentation with Swagger
+fiber v3 middleware to automatically generate RESTful API documentation with Swagger
 
 ## Usage
 
@@ -21,9 +21,9 @@ go install github.com/swaggo/swag/cmd/swag@latest
 ```sh
 swag init
 ```
-4. Download [swagger](https://github.com/gofiber/swagger) by using:
+4. Download [swagger](https://github.com/Flussen/swagger-fiber-v3) by using:
 ```sh
-go get -u github.com/gofiber/swagger
+go get -u github.com/Flussen/swagger/fiber/v3
 ```
 And import following in your code:
 
